@@ -8,7 +8,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -38,11 +37,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final minutes = duration.inMinutes.remainder(60);
 
     String result = '';
-    if (hours > 0) result += '${hours.toString().padLeft(2, '0')} Stunden';
+    if (hours > 0) result += '$hours hours';
     if (minutes > 0) {
       if (result.isNotEmpty) result += ' ';
-      result +=
-          '${(hours > 0) ? 'und ' : ''}${minutes.toString().padLeft(2, '0')} Minuten';
+      result += '${(hours > 0) ? 'and ' : ''}$minutes minutes';
     }
     return result;
   }
@@ -69,8 +67,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 if(index == _durations.length - 1){
                   return Column(
                     children: [
-                      ListTile(
-                        title: Text(formatDurationHMin(_durations[index])),
+                      Dismissible(
+                        key: UniqueKey(),
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerLeft,
+                          padding: EdgeInsets.only(left: 20),
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                        direction: DismissDirection.endToStart,
+                        onDismissed: (direction) {
+                          setState(() {
+                            _durations.removeAt(index);
+                          });
+                        },
+                        child: ListTile(
+                          title: Text(formatDurationHMin(_durations[index])),
+                        ),
                       ),
                       ListTile(
                         title: Text("In Total: ${sumUpEverything(_durations)}"),
@@ -79,8 +92,23 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 }
 
-                return ListTile(
-                  title: Text(formatDurationHMin(_durations[index])),
+                return Dismissible(
+                  key: UniqueKey(),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.only(left: 20),
+                    child: Icon(Icons.delete, color: Colors.white),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    setState(() {
+                      _durations.removeAt(index);
+                    });
+                  },
+                  child: ListTile(
+                    title: Text(formatDurationHMin(_durations[index])),
+                  ),
                 );
               },
             ),

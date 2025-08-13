@@ -1,5 +1,5 @@
-import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
+import 'duration.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,120 +16,88 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       debugShowCheckedModeBanner: false,
-      home: const MyHomePage(title: 'Time Duration Calculator'),
+      home: const MainMenu(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+class MainMenu extends StatefulWidget {
+  const MainMenu({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainMenu> createState() => _MainMenuState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final List<Duration> _durations = [];
+class _MainMenuState extends State<MainMenu> {
+  int _selectedIndex = 0;
 
-  String formatDurationHMin(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
+  static const List<Widget> _widgetOptions = <Widget>[
+    MyDurationPage(),
+    Text('Index 1: Business'),
+  ];
 
-    String result = '';
-    if (hours > 0) result += '$hours hours';
-    if (minutes > 0) {
-      if (result.isNotEmpty) result += ' ';
-      result += '${(hours > 0) ? 'and ' : ''}$minutes minutes';
-    }
-    return result;
-  }
+  static const List<Widget> _topicOptions = <Widget>[
+    Text('Time Duration Adding Calculator'),
+    Text('Time Difference Calculator'),
+  ];
 
-  String sumUpEverything(List<Duration> durations) {
-    Duration total = durations.fold(Duration.zero, (sum, item) => sum + item);
-    String out = formatDurationHMin(total);
-    return out;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: _topicOptions[_selectedIndex],
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _durations.length,
-              itemBuilder: (context, index) {
-                if(index == _durations.length - 1){
-                  return Column(
-                    children: [
-                      Dismissible(
-                        key: UniqueKey(),
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerLeft,
-                          padding: EdgeInsets.only(left: 20),
-                          child: Icon(Icons.delete, color: Colors.white),
-                        ),
-                        direction: DismissDirection.endToStart,
-                        onDismissed: (direction) {
-                          setState(() {
-                            _durations.removeAt(index);
-                          });
-                        },
-                        child: ListTile(
-                          title: Text(formatDurationHMin(_durations[index])),
-                        ),
-                      ),
-                      ListTile(
-                        title: Text("In Total: ${sumUpEverything(_durations)}"),
-                      )
-                    ],
-                  );
-                }
-
-                return Dismissible(
-                  key: UniqueKey(),
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.only(left: 20),
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (direction) {
-                    setState(() {
-                      _durations.removeAt(index);
-                    });
-                  },
-                  child: ListTile(
-                    title: Text(formatDurationHMin(_durations[index])),
-                  ),
-                );
+      body: Center(child: _widgetOptions[_selectedIndex]),
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Center(child: Text('Time Calculations')),
+            ),
+            ListTile(
+              title: const Text('Time Duration Adding Calculator'),
+              selected: _selectedIndex == 0,
+              onTap: () {
+                // Update the state of the app
+                _onItemTapped(0);
+                // Then close the drawer
+                Navigator.pop(context);
               },
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var resultingDuration = await showDurationPicker(
-            context: context,
-            initialTime: Duration(minutes: 30),
-          );
-
-          if (resultingDuration != null && resultingDuration > Duration.zero) {
-            setState(() {
-              _durations.add(resultingDuration);
-            });
-          }
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+            ListTile(
+              title: const Text('Time Difference Calculator'),
+              selected: _selectedIndex == 1,
+              onTap: () {
+                // Update the state of the app
+                _onItemTapped(1);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
